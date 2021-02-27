@@ -20,10 +20,12 @@ l1z1                                                                            
 001C 03                 19     RIGHT:  RR A
 001D F5B0               20             MOV P3, A
 001F 020007             21             LJMP READ
-                        22
-                        23     END
-ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
+****WARNING:Missing`END'directive
+ASSEMBLY COMPLETE, NO ERRORS FOUND, 1 WARNING
 
+
+ERROR SUMMARY:
+Line 21, WARNING:Missing`END'directive
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED

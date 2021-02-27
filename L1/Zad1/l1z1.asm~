@@ -1,40 +1,23 @@
-	ORG	0000h
-	ljmp	setup
+INITIAL_VALUE SET 11111110B
 
-	ORG	0100h
-setup:
-	isLeft	EQU	0b
-	isFirst EQU	1b
-	MOV	A, #0FEh
-	ljmp start
-main:
-	jb	P2.0, P20tak
-	jb	P2.1, P20nieP21tak
-	ljmp	P20nieP21nie
-start:
-	jb isFirst, main
-	jb isLeft, P20takP21nie
-	ljmp P20nieP21tak
+ORG 0000h
+	MOV A, #INITIAL_VALUE
+	MOV P3, A
+	LJMP READ
 
-P20tak:
-	jb	P2.1, P20takP21tak
-	ljmp	P20takP21nie
+READ:	JB P2.0, P20YES
+	JB P2.1, LEFT
+	LJMP READ
 
-P20takP21nie: ;w lewo
-	SETB	isLeft
-	MOV	P0, A
-	RL	A
-	ljmp	start
+P20YES:	JNB P2.1, RIGHT
+	LJMP READ
 
-P20nieP21tak: ;w prawo
-	CLR	isLeft
-	MOV	P0, A
-	RR	A
-	ljmp	start
+LEFT:	RL A
+	MOV P3, A
+	LJMP READ
 
-P20nieP21nie: ;bez zmian
-P20takP21tak: ;bez zmian
-	ljmp start
-
+RIGHT:	RR A
+	MOV P3, A
+	LJMP READ
 
 END
