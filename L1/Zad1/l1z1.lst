@@ -1,49 +1,29 @@
 l1z1                                                                                                                    PAGE 1
   00FE                   1     INITIAL_VALUE SET 11111110B
-                         2     IS_RUNNING: DBIT 1;0 - not running, 1 - running
-****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-                         3     RUNNING_SIDE: DBIT 1; 0 - left , 1 - right
-****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-0036 C200                4     CLR IS_RUNNING
-0038 C201                5     CLR RUNNING_SIDE
-                         6
-                         7     ORG 0000h
-0000 74FE                8             MOV A, #INITIAL_VALUE
-0002 F5B0                9             MOV P3, A
-0004 02000D             10             LJMP READ
+                         2
+                         3     ORG 0000h
+0000 74FE                4             MOV A, #INITIAL_VALUE
+0002 F5B0                5             MOV P3, A
+0004 020007              6             LJMP READ
+                         7
+0007 20A006              8     READ:   JB P2.0, P20YES
+000A 20A109              9             JB P2.1, LEFT
+000D 020007             10             LJMP READ
                         11
-                        12     ALREADY_RUNNING:
-0007 200122             13             JB RUNNING_SIDE, RIGHT
-000A 020022             14             LJMP LEFT
-                        15
-000D 20A009             16     READ:   JB P2.0, P20YES
-0010 20A10F             17             JB P2.1, LEFT
-0013 2000F1             18             JB IS_RUNNING, ALREADY_RUNNING
-0016 02000D             19             LJMP READ
-                        20
-0019 30A110             21     P20YES: JNB P2.1, RIGHT
-001C 2000E8             22             JB IS_RUNNING, ALREADY_RUNNING
-001F 02000D             23             LJMP READ
-                        24
-0022 D200               25     LEFT:   SETB IS_RUNNING
-0024 C201               26             CLR RUNNING_SIDE
-0026 23                 27             RL A
-0027 F5B0               28             MOV P3, A
-0029 02000D             29             LJMP READ
-                        30
-002C D200               31     RIGHT:  SETB IS_RUNNING
-002E D201               32             SETB RUNNING_SIDE
-0030 03                 33             RR A
-0031 F5B0               34             MOV P3, A
-0033 02000D             35             LJMP READ
-                        36
-                        37     END
-ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
+0010 30A109             12     P20YES: JNB P2.1, RIGHT
+0013 020007             13             LJMP READ
+                        14
+0016 23                 15     LEFT:   RL A
+0017 F5B0               16             MOV P3, A
+0019 020007             17             LJMP READ
+                        18
+001C 03                 19     RIGHT:  RR A
+001D F5B0               20             MOV P3, A
+001F 020007             21             LJMP READ
+                        22
+                        23     END
+ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
 
-
-ERROR SUMMARY:
-Line 2, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-Line 4, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -56,7 +36,6 @@ ADCLK. . . . . . . . . . . . . . . .  D  ADDR  00F2H  NOT USED
 ADCON. . . . . . . . . . . . . . . .  D  ADDR  00F3H  NOT USED
 ADDH . . . . . . . . . . . . . . . .  D  ADDR  00F5H  NOT USED
 ADDL . . . . . . . . . . . . . . . .  D  ADDR  00F4H  NOT USED
-ALREADY_RUNNING. . . . . . . . . . .  C  ADDR  0007H
 AUXR . . . . . . . . . . . . . . . .  D  ADDR  008EH  NOT USED
 AUXR1. . . . . . . . . . . . . . . .  D  ADDR  00A2H  NOT USED
 B. . . . . . . . . . . . . . . . . .  D  ADDR  00F0H  NOT USED
@@ -133,13 +112,12 @@ IPH0 . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH1 . . . . . . . . . . . . . . . .  D  ADDR  00B3H  NOT USED
 IPL0 . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPL1 . . . . . . . . . . . . . . . .  D  ADDR  00B2H  NOT USED
-IS_RUNNING . . . . . . . . . . . . .  B  ADDR  0000H
 IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H  NOT USED
 IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-LEFT . . . . . . . . . . . . . . . .  C  ADDR  0022H
+LEFT . . . . . . . . . . . . . . . .  C  ADDR  0016H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -148,7 +126,7 @@ P1 . . . . . . . . . . . . . . . . .  D  ADDR  0090H  NOT USED
 P1M1 . . . . . . . . . . . . . . . .  D  ADDR  00D4H  NOT USED
 P1M2 . . . . . . . . . . . . . . . .  D  ADDR  00E2H  NOT USED
 P2 . . . . . . . . . . . . . . . . .  D  ADDR  00A0H
-P20YES . . . . . . . . . . . . . . .  C  ADDR  0019H
+P20YES . . . . . . . . . . . . . . .  C  ADDR  0010H
 P3 . . . . . . . . . . . . . . . . .  D  ADDR  00B0H
 P3M1 . . . . . . . . . . . . . . . .  D  ADDR  00D5H  NOT USED
 P3M2 . . . . . . . . . . . . . . . .  D  ADDR  00E3H  NOT USED
@@ -177,14 +155,13 @@ RCAP2H . . . . . . . . . . . . . . .  D  ADDR  00CBH  NOT USED
 RCAP2L . . . . . . . . . . . . . . .  D  ADDR  00CAH  NOT USED
 RCLK . . . . . . . . . . . . . . . .  B  ADDR  00CDH  NOT USED
 RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
-READ . . . . . . . . . . . . . . . .  C  ADDR  000DH
+READ . . . . . . . . . . . . . . . .  C  ADDR  0007H
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H  NOT USED
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
-RIGHT. . . . . . . . . . . . . . . .  C  ADDR  002CH
+RIGHT. . . . . . . . . . . . . . . .  C  ADDR  001CH
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
-RUNNING_SIDE . . . . . . . . . . . .  B  ADDR  0001H
 RXD. . . . . . . . . . . . . . . . .  B  ADDR  00B0H  NOT USED
 SADDR. . . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED
 SADDR_0. . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED

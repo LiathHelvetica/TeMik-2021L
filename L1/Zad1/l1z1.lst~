@@ -1,50 +1,29 @@
 l1z1                                                                                                                    PAGE 1
   00FE                   1     INITIAL_VALUE SET 11111110B
-                         2     RUNNING_STATES: DS 1
-****WARNING:Using`DS'directive,butcurrentlyactivesegmentis`CSEG'
-  0000                   3     IS_RUNNING BIT RUNNING_STATES.0;0 - not running, 1 - running
-****ERROR:Givenregisterdoesnotbelongtothebitaddressablearea:RUNNING_STATES.0
-  0001                   4     RUNNING_SIDE BIT IS_RUNNING+1; 0 - left , 1 - right
-                         5     CLR IS_RUNNING
-                         6     CLR RUNNING_SIDE
+                         2
+                         3     ORG 0000h
+0000 74FE                4             MOV A, #INITIAL_VALUE
+0002 F5B0                5             MOV P3, A
+0004 020007              6             LJMP READ
                          7
-                         8     ORG 0000h
-                         9             MOV A, #INITIAL_VALUE
-                        10             MOV P3, A
-                        11             LJMP READ
-                        12
-                        13     ALREADY_RUNNING:
-                        14             JB RUNNING_SIDE, RIGHT
-                        15             LJMP LEFT
-                        16
-                        17     READ:   JB P2.0, P20YES
-                        18             JB P2.1, LEFT
-                        19             JB IS_RUNNING, ALREADY_RUNNING
-                        20             LJMP READ
-                        21
-                        22     P20YES: JNB P2.1, RIGHT
-                        23             JB IS_RUNNING, ALREADY_RUNNING
-                        24             LJMP READ
-                        25
-                        26     LEFT:   SETB IS_RUNNING
-                        27             CLR RUNNING_SIDE
-                        28             RL A
-                        29             MOV P3, A
-                        30             LJMP READ
-                        31
-                        32     RIGHT:  SETB IS_RUNNING
-                        33             SETB RUNNING_SIDE
-                        34             RR A
-                        35             MOV P3, A
-                        36             LJMP READ
-                        37
-                        38     END
-ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
+0007 20A006              8     READ:   JB P2.0, P20YES
+000A 20A109              9             JB P2.1, LEFT
+000D 020007             10             LJMP READ
+                        11
+0010 30A109             12     P20YES: JNB P2.1, RIGHT
+0013 020007             13             LJMP READ
+                        14
+0016 23                 15     LEFT:   RL A
+0017 F5B0               16             MOV P3, A
+0019 020007             17             LJMP READ
+                        18
+001C 03                 19     RIGHT:  RR A
+001D F5B0               20             MOV P3, A
+001F 020007             21             LJMP READ
+                        22
+                        23     END
+ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
 
-
-ERROR SUMMARY:
-Line 2, WARNING:Using`DS'directive,butcurrentlyactivesegmentis`CSEG'
-Line 4, ERROR:Givenregisterdoesnotbelongtothebitaddressablearea:RUNNING_STATES.0
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -57,7 +36,6 @@ ADCLK. . . . . . . . . . . . . . . .  D  ADDR  00F2H  NOT USED
 ADCON. . . . . . . . . . . . . . . .  D  ADDR  00F3H  NOT USED
 ADDH . . . . . . . . . . . . . . . .  D  ADDR  00F5H  NOT USED
 ADDL . . . . . . . . . . . . . . . .  D  ADDR  00F4H  NOT USED
-ALREADY_RUNNING. . . . . . . . . . .  C  ADDR  0007H
 AUXR . . . . . . . . . . . . . . . .  D  ADDR  008EH  NOT USED
 AUXR1. . . . . . . . . . . . . . . .  D  ADDR  00A2H  NOT USED
 B. . . . . . . . . . . . . . . . . .  D  ADDR  00F0H  NOT USED
@@ -134,13 +112,12 @@ IPH0 . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH1 . . . . . . . . . . . . . . . .  D  ADDR  00B3H  NOT USED
 IPL0 . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPL1 . . . . . . . . . . . . . . . .  D  ADDR  00B2H  NOT USED
-IS_RUNNING . . . . . . . . . . . . .  B  ADDR  0000H
 IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H  NOT USED
 IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-LEFT . . . . . . . . . . . . . . . .  C  ADDR  0022H
+LEFT . . . . . . . . . . . . . . . .  C  ADDR  0016H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -149,7 +126,7 @@ P1 . . . . . . . . . . . . . . . . .  D  ADDR  0090H  NOT USED
 P1M1 . . . . . . . . . . . . . . . .  D  ADDR  00D4H  NOT USED
 P1M2 . . . . . . . . . . . . . . . .  D  ADDR  00E2H  NOT USED
 P2 . . . . . . . . . . . . . . . . .  D  ADDR  00A0H
-P20YES . . . . . . . . . . . . . . .  C  ADDR  0019H
+P20YES . . . . . . . . . . . . . . .  C  ADDR  0010H
 P3 . . . . . . . . . . . . . . . . .  D  ADDR  00B0H
 P3M1 . . . . . . . . . . . . . . . .  D  ADDR  00D5H  NOT USED
 P3M2 . . . . . . . . . . . . . . . .  D  ADDR  00E3H  NOT USED
@@ -178,15 +155,13 @@ RCAP2H . . . . . . . . . . . . . . .  D  ADDR  00CBH  NOT USED
 RCAP2L . . . . . . . . . . . . . . .  D  ADDR  00CAH  NOT USED
 RCLK . . . . . . . . . . . . . . . .  B  ADDR  00CDH  NOT USED
 RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
-READ . . . . . . . . . . . . . . . .  C  ADDR  000DH
+READ . . . . . . . . . . . . . . . .  C  ADDR  0007H
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H  NOT USED
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
-RIGHT. . . . . . . . . . . . . . . .  C  ADDR  002CH
+RIGHT. . . . . . . . . . . . . . . .  C  ADDR  001CH
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
-RUNNING_SIDE . . . . . . . . . . . .  B  ADDR  0001H
-RUNNING_STATES . . . . . . . . . . .  D  ADDR  0000H  NOT USED
 RXD. . . . . . . . . . . . . . . . .  B  ADDR  00B0H  NOT USED
 SADDR. . . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED
 SADDR_0. . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED
