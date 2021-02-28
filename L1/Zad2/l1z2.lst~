@@ -2,46 +2,22 @@ l1z2                                                                            
   00FE                   1     INITIAL_VALUE set 11111110B
                          2     ORG 0000h
                          3
-                         4     MOV A, #INITIAL_VALUE
-                         5     LJMP LEFT
+0000 74FE                4     MOV A, #INITIAL_VALUE
+0002 020005              5     LJMP LEFT
                          6
-                         7     ORG 2000h
-                         8     LEFT:   MOV P3, A
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                         9             JNB P3.7, RIGHT
-****ERROR:Labelistoofarfor8-bitrelativeaddressing.Trytodisablepeepholeoptimizationsiftheyareon.
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        10             RL A
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        11             LJMP LEFT
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        12
-                        13     ORG 3000h
-                        14     RIGHT:  MOV P3, A
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        15             JNB P3.0, LEFT
-****ERROR:Labelistoofarfor8-bitrelativeaddressing.Trytodisablepeepholeoptimizationsiftheyareon.
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        16             RR A
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        17             LJMP RIGHT
-****WARNING:Thisinstructionexceedingcodememorycapacity
-                        18
-                        19     END
-ASSEMBLY COMPLETE, NO ERRORS FOUND, 10 WARNINGS
+0005 F5B0                7     LEFT:   MOV P3, A
+0007 30B704              8             JNB P3.7, RIGHT
+000A 23                  9             RL A
+000B 020005             10             LJMP LEFT
+                        11
+000E F5B0               12     RIGHT:  MOV P3, A
+0010 30B0F2             13             JNB P3.0, LEFT
+0013 03                 14             RR A
+0014 02000E             15             LJMP RIGHT
+                        16
+                        17     END
+ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
 
-
-ERROR SUMMARY:
-Line 8, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 10, ERROR:Labelistoofarfor8-bitrelativeaddressing.Trytodisablepeepholeoptimizationsiftheyareon.
-Line 11, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 13, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 15, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 19, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 21, ERROR:Labelistoofarfor8-bitrelativeaddressing.Trytodisablepeepholeoptimizationsiftheyareon.
-Line 22, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 24, WARNING:Thisinstructionexceedingcodememorycapacity
-Line 26, WARNING:Thisinstructionexceedingcodememorycapacity
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -135,7 +111,7 @@ IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-LEFT . . . . . . . . . . . . . . . .  C  ADDR  2000H
+LEFT . . . . . . . . . . . . . . . .  C  ADDR  0005H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -175,7 +151,7 @@ RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H  NOT USED
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
-RIGHT. . . . . . . . . . . . . . . .  C  ADDR  3000H
+RIGHT. . . . . . . . . . . . . . . .  C  ADDR  000EH
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
 RXD. . . . . . . . . . . . . . . . .  B  ADDR  00B0H  NOT USED

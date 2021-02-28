@@ -1,9 +1,9 @@
 l1z2                                                                                                                    PAGE 1
   00FE                   1     INITIAL_VALUE set 11111110B
-                         2     ORG 0000h
-                         3
-0000 74FE                4     MOV A, #INITIAL_VALUE
-0002 020005              5     LJMP LEFT
+                         2
+                         3     ORG 0000h
+0000 74FE                4             MOV A, #INITIAL_VALUE
+0002 020005              5             LJMP LEFT
                          6
 0005 F5B0                7     LEFT:   MOV P3, A
 0007 30B704              8             JNB P3.7, RIGHT
