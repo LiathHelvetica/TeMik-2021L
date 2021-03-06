@@ -17,4 +17,4 @@ ORG 0000Bh 		; Obsługa przerwania od timera
 
 ORG xxx			; Obsługa przerwania od przycisku P1.0
 	SETB SEND	; Ustaw flagę przesyłania na "1"
-	RETI		; Powrót z przerwania
+	RETI
