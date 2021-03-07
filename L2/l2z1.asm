@@ -1,20 +1,37 @@
 ORG 0000h
-	ljmp init	; Inicjalizacja programu
+	ljmp 0300h	; Inicjalizacja programu
 
-ORG 3000h
-init:	MOV TMOD, #01h	; Inicjalizacja Timera
+ORG 0300h
+	timL EQU 0F2H
+	timh EQU 0FFH	; Definiowanie stałych
+	MOV TMOD, #01h	; Tryb timera 16-bit
+	MOV TL0, #timL
+	MOV TH0, #timH	; Ustawienie wartości do odliczenia
 	SETB TR0	; "Uruchomienie" Timera
-	SETB ET0	; Maska przerwania od T0
-	SETB EAL	; Maska główna
+	SETB IT0	; Przerwanie przycisku na zboczu
+	SETB EX0	; Maska przerwania zewnętrznego INT0/P3.2
+	SETB ET0	; Maska przerwania timera
+	SETB EA		; Maska główna
 	SEND SET 00h	; Ustawienie flagi przesyłania na "0"
 
 main:	ljmp main	; "Pętla" główna programu
 
 ORG 0000Bh 		; Obsługa przerwania od timera
-	JB SEND, RETI	; Sprawdź czy ustawiona flaga aby przesyłać
-	MOV P3, P2	; Przesłanie danej P2 (przyciski) na P3 (led)
-	RETI		; Powrót z przerwania
+	LJMP 0200h
 
-ORG xxx			; Obsługa przerwania od przycisku P1.0
+ORG 0003h		; Obsługa przerwania od przycisku P1.0
+	LJMP 0100h
+
+ORG 0100h		; Obsługa przerwania od przycisku P1.0
 	SETB SEND	; Ustaw flagę przesyłania na "1"
 	RETI		; Powrót z przerwania
+
+ORG 0200h		; Obsługa przerwania od timera
+	MOV TL0, #timL
+	MOV TH0, #timH	; Ustawienie wartości do odliczenia
+	JNB SEND, fin	; Sprawdź czy ustawiona flaga aby przesyłać
+	MOV P2, P1	; Przesłanie danej P2 (przyciski) na P3 (led)
+fin:	CLR SEND	; Pozwól na ponowny odczyt przycisku
+	RETI		; Powrót z przerwania
+
+END
