@@ -6,7 +6,8 @@
 <img src="zadania/l2.png" width="80%"></img>
 
 ## Lab 3
-<img src="zadania/l3.pdf" width="80%"></img>
+<img src="zadania/l3_1.jpg" width="80%"></img>
+<img src="zadania/l3_2.jpg" width="80%"></img>
 
 ## Lab 4
 <img src="zadania/l4.png" width="80%"></img>
