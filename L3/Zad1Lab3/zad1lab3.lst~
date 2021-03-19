@@ -1,57 +1,59 @@
 zad1lab3                                                                                                                PAGE 1
-                         1     ORG 0900h
-0900 C0                  2     DATA:   DB 11000000b
+  0019                   1     LAST_INDEX SET 00011001b
+                         2
+                         3     ORG 0900h
+0900 C0                  4     DATA:   DB 11000000b
 ****WARNING:Reservedkeywordusedaslabel
-0901 F9                  3             DB 11111001b
-0902 A4                  4             DB 10100100b
-0903 B0                  5             DB 10110000b
-0904 99                  6             DB 10011001b
-0905 92                  7             DB 10010010b
-0906 82                  8             DB 10000010b
-0907 F8                  9             DB 11111000b
-0908 80                 10             DB 10000000b
-0909 90                 11             DB 10010000b
-090A 88                 12             DB 10001000b
-090B 83                 13             DB 10000011b
-090C A7                 14             DB 10100111b
-090D C6                 15             DB 11000110b
-090E A1                 16             DB 10100001b
-090F 86                 17             DB 10000110b
-0910 8E                 18             DB 10001110b
-0911 90                 19             DB 10010000b
-0912 8B                 20             DB 10001011b
-0913 89                 21             DB 10001001b
-0914 C7                 22             DB 11000111b
-0915 A3                 23             DB 10100011b
-0916 8C                 24             DB 10001100b
-0917 E3                 25             DB 11100011b
-0918 C1                 26             DB 11000001b
-0919 FF                 27             DB 11111111b
-                        28
-                        29     ORG 0000h
+0901 F9                  5             DB 11111001b
+0902 A4                  6             DB 10100100b
+0903 B0                  7             DB 10110000b
+0904 99                  8             DB 10011001b
+0905 92                  9             DB 10010010b
+0906 82                 10             DB 10000010b
+0907 F8                 11             DB 11111000b
+0908 80                 12             DB 10000000b
+0909 90                 13             DB 10010000b
+090A 88                 14             DB 10001000b
+090B 83                 15             DB 10000011b
+090C A7                 16             DB 10100111b
+090D C6                 17             DB 11000110b
+090E A1                 18             DB 10100001b
+090F 86                 19             DB 10000110b
+0910 8E                 20             DB 10001110b
+0911 90                 21             DB 10010000b
+0912 8B                 22             DB 10001011b
+0913 89                 23             DB 10001001b
+0914 C7                 24             DB 11000111b
+0915 A3                 25             DB 10100011b
+0916 8C                 26             DB 10001100b
+0917 E3                 27             DB 11100011b
+0918 C1                 28             DB 11000001b
+0919 FF                 29             DB 11111111b
+                        30
+                        31     ORG 0000h
 ****WARNING:ThisORGhaslowervaluethanthepreviousone
-0000 900900             30             MOV DPTR, #DATA
-0003 E5A0               31     MAIN:   MOV A, P2
-0005 F4                 32             CPL A
-0006 020010             33             LJMP READ
-0009 E8                 34     FIN:    MOV A, R0
-000A 93                 35             MOVC A, @A+DPTR
-000B F5B0               36             MOV P3, A
-000D 020003             37             LJMP MAIN
-                        38
-0010 F8                 39     READ:   MOV R0, A
-0011 9419               40             SUBB A, #00011001b
-0013 40F4               41             JC FIN
-0015 7819               42             MOV R0, #00011001b
-0017 020009             43             LJMP FIN
-                        44
-                        45     END
+0000 900900             32             MOV DPTR, #DATA
+0003 E5A0               33     MAIN:   MOV A, P2
+0005 F4                 34             CPL A
+0006 020010             35             LJMP READ
+0009 E8                 36     FIN:    MOV A, R0
+000A 93                 37             MOVC A, @A+DPTR
+000B F5B0               38             MOV P3, A
+000D 020003             39             LJMP MAIN
+                        40
+0010 F8                 41     READ:   MOV R0, A
+0011 9419               42             SUBB A, #LAST_INDEX
+0013 40F4               43             JC FIN
+0015 7819               44             MOV R0, #LAST_INDEX
+0017 020009             45             LJMP FIN
+                        46
+                        47     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 2, WARNING:Reservedkeywordusedaslabel
-Line 30, WARNING:ThisORGhaslowervaluethanthepreviousone
+Line 4, WARNING:Reservedkeywordusedaslabel
+Line 32, WARNING:ThisORGhaslowervaluethanthepreviousone
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -146,6 +148,7 @@ IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
+LAST_INDEX . . . . . . . . . . . . .     NUMB  0019H            REDEFINABLE
 MAIN . . . . . . . . . . . . . . . .  C  ADDR  0003H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
