@@ -1,4 +1,0 @@
-# MCU 8051 IDE: Virtual HW configuration file
-# Project: zad1
-
-LedDisplay {{4 3 0 3 5 3 1 3 6 3 2 3 7 3 3 3} {4 3 0 7 5 2 1 6 6 1 2 5 7 0 3 4} 230x175+464+160 {} red 1 0}
