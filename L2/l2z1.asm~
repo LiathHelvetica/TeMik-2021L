@@ -30,7 +30,7 @@ ORG 0200h		; Obsługa przerwania od timera
 	MOV TL0, #timL
 	MOV TH0, #timH	; Ustawienie wartości do odliczenia
 	JNB SEND, fin	; Sprawdź czy ustawiona flaga aby przesyłać
-	MOV P2, P1	; Przesłanie danej P2 (przyciski) na P3 (led)
+	MOV P2, P1	; Przesłanie danej P1 (przyciski) na P2 (led)
 fin:	CLR SEND	; Pozwól na ponowny odczyt przycisku
 	RETI		; Powrót z przerwania
 

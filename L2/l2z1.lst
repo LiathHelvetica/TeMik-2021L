@@ -33,7 +33,7 @@ l2z1                                                                            
 0200 758AF2             30             MOV TL0, #timL
 0203 758CFF             31             MOV TH0, #timH  ; Ustawienie wartości do odliczenia
 0206 300003             32             JNB SEND, fin   ; Sprawdź czy ustawiona flaga aby przesyłać
-0209 8590A0             33             MOV P2, P1      ; Przesłanie danej P2 (przyciski) na P3 (led)
+0209 8590A0             33             MOV P2, P1      ; Przesłanie danej P1 (przyciski) na P2 (led)
 020C C200               34     fin:    CLR SEND        ; Pozwól na ponowny odczyt przycisku
 020E 32                 35             RETI            ; Powrót z przerwania
                         36
