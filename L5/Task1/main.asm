@@ -32,7 +32,7 @@ INIT:	MOV DPTR, #NUMS		; init - Data pointer
 	SETB IT1
 	SETB ET0		; maska timera
 	SETB EX0		; maska P3.2 (reset)
-	SETB EX1		; maska P3.1 (start/stop)
+	SETB EX1		; maska P3.3 (start/stop)
 	SETB PX0		; wysoki priorytet przycisków
 	SETB PX1
 	CLR PT0			; niski priorytet timera
