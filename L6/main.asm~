@@ -14,6 +14,7 @@ INIT:	SETB F0				; najpierw odlicz do okresu
 	TLOW EQU 0F2H
 	THIGH EQU 0FFH			; stałe timera
 	MOV COUNTER, P1			; zacznij od odliczania do okresu
+	INC COUNTER			; timer przesunięty o 1 (odliczanie od 1 do T+1)
 	MOV PREVPERIOD, P0
 	MOV PREVFILL, P1		; początkowe wartości
 	CLR P2.0			; zacznij od stanu niskiego

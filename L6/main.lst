@@ -15,63 +15,64 @@ main                                                                            
   00F2                  14             TLOW EQU 0F2H
   00FF                  15             THIGH EQU 0FFH                  ; stałe timera
 0302 859030             16             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
-0305 858031             17             MOV PREVPERIOD, P0
-0308 859032             18             MOV PREVFILL, P1                ; początkowe wartości
-030B C2A0               19             CLR P2.0                        ; zacznij od stanu niskiego
-030D 758901             20             MOV TMOD, #01h                  ; 16-bit timer
-0310 758AF2             21             MOV TL0, #TLOW
-0313 758CFF             22             MOV TH0, #THIGH                 ; czas timera
-0316 D28C               23             SETB TR0                        ; zacznij liczyć
-0318 D2A9               24             SETB ET0                        ; maska timera
-031A D2AF               25             SETB EA                         ; maska główna
-031C 02031C             26     MAIN:   LJMP MAIN                       ; mądry program
-                        27
-                        28     ORG 0000Bh
+0305 0530               17             INC COUNTER                     ; timer przesunięty o 1 (odliczanie od 1 do T+1)
+0307 858031             18             MOV PREVPERIOD, P0
+030A 859032             19             MOV PREVFILL, P1                ; początkowe wartości
+030D C2A0               20             CLR P2.0                        ; zacznij od stanu niskiego
+030F 758901             21             MOV TMOD, #01h                  ; 16-bit timer
+0312 758AF2             22             MOV TL0, #TLOW
+0315 758CFF             23             MOV TH0, #THIGH                 ; czas timera
+0318 D28C               24             SETB TR0                        ; zacznij liczyć
+031A D2A9               25             SETB ET0                        ; maska timera
+031C D2AF               26             SETB EA                         ; maska główna
+031E 02031E             27     MAIN:   LJMP MAIN                       ; mądry program
+                        28
+                        29     ORG 0000Bh
 ****WARNING:ThisORGhaslowervaluethanthepreviousone
-000B 020400             29             LJMP TIMI
-                        30
-                        31     ORG 0400h
-0400 758AF2             32     TIMI:   MOV TL0, #TLOW
-0403 758CFF             33             MOV TH0, #THIGH                 ; czas timera
-0406 E580               34             MOV A, P0
-0408 B5310B             35             CJNE A, PREVPERIOD, RESET
-040B E590               36             MOV A, P1
-040D B53206             37             CJNE A, PREVFILL, RESET
-0410 20D511             38             JB F0, PERIOD
-0413 020435             39             LJMP FILL
-                        40
-0416 D2D5               41     RESET:  SETB F0
-0418 859030             42             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
-041B 858031             43             MOV PREVPERIOD, P0
-041E 859032             44             MOV PREVFILL, P1                ; początkowe wartości
-0421 C2A0               45             CLR P2.0                        ; zacznij od stanu niskiego
-0423 32                 46             RETI
-                        47
-0424 E530               48     PERIOD: MOV A, COUNTER
-0426 9580               49             SUBB A, P0
-0428 4008               50             JC SKIPP
-042A D2A0               51             SETB P2.0
-042C 753001             52             MOV COUNTER, #01H
-042F C2D5               53             CLR F0
-0431 32                 54             RETI
-                        55
-0432 0530               56     SKIPP:  INC COUNTER
-0434 32                 57             RETI
-                        58
-0435 E530               59     FILL:   MOV A, COUNTER
-0437 9590               60             SUBB A, P1
-0439 4004               61             JC SKIPF
-043B C2A0               62             CLR P2.0
-043D D2D5               63             SETB F0
-043F 0530               64     SKIPF:  INC COUNTER
-0441 32                 65             RETI
+000B 020400             30             LJMP TIMI
+                        31
+                        32     ORG 0400h
+0400 758AF2             33     TIMI:   MOV TL0, #TLOW
+0403 758CFF             34             MOV TH0, #THIGH                 ; czas timera
+0406 E580               35             MOV A, P0
+0408 B5310B             36             CJNE A, PREVPERIOD, RESET
+040B E590               37             MOV A, P1
+040D B53206             38             CJNE A, PREVFILL, RESET
+0410 20D511             39             JB F0, PERIOD
+0413 020435             40             LJMP FILL
+                        41
+0416 D2D5               42     RESET:  SETB F0
+0418 859030             43             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
+041B 858031             44             MOV PREVPERIOD, P0
+041E 859032             45             MOV PREVFILL, P1                ; początkowe wartości
+0421 C2A0               46             CLR P2.0                        ; zacznij od stanu niskiego
+0423 32                 47             RETI
+                        48
+0424 E530               49     PERIOD: MOV A, COUNTER
+0426 9580               50             SUBB A, P0
+0428 4008               51             JC SKIPP
+042A D2A0               52             SETB P2.0
+042C 753001             53             MOV COUNTER, #01H
+042F C2D5               54             CLR F0
+0431 32                 55             RETI
+                        56
+0432 0530               57     SKIPP:  INC COUNTER
+0434 32                 58             RETI
+                        59
+0435 E530               60     FILL:   MOV A, COUNTER
+0437 9590               61             SUBB A, P1
+0439 4004               62             JC SKIPF
+043B C2A0               63             CLR P2.0
+043D D2D5               64             SETB F0
+043F 0530               65     SKIPF:  INC COUNTER
+0441 32                 66             RETI
 ****WARNING:Missing`END'directive
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 28, WARNING:ThisORGhaslowervaluethanthepreviousone
-Line 66, WARNING:Missing`END'directive
+Line 29, WARNING:ThisORGhaslowervaluethanthepreviousone
+Line 67, WARNING:Missing`END'directive
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -167,7 +168,7 @@ IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-MAIN . . . . . . . . . . . . . . . .  C  ADDR  031CH
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  031EH
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
