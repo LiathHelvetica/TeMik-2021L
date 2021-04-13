@@ -23,7 +23,7 @@ main                                                                            
   000A                  21             DIVISOR EQU 0Ah         ; 10
   0064                  22             MAX EQU 64h             ; 100
   0000                  23             INITVAL EQU 00h         ; 0
-                        24             RUN: DBIT 1             ; F0 - flaga on/off (1/0)
+                        24             RUN: DBIT 1             ; flaga on/off (1/0)
 ****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
 0303 D200               25             SETB RUN
 0305 753000             26             MOV COUNTER, #INITVAL   ; wyzerowanie licznika
