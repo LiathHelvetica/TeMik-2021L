@@ -2,77 +2,106 @@ main                                                                            
                          1     ORG 0000H
 0000 020300              2             LJMP INIT
                          3
-                         4     ; P0 - okres
-                         5     ; P1 - wypełnienie
-                         6     ; F0 - if 0 odliczaj wypełnienie else odliczaj do okresu
-                         7     ; P2.0 - wyjście
-                         8
-                         9     ORG 0300H
-0300 D2D5               10     INIT:   SETB F0                         ; najpierw odlicz do okresu
-  0030                  11             COUNTER EQU 30H                 ; licznik
-  0031                  12             PREVPERIOD EQU 31H              ; zapamiętanie poprzedniego okresu
-  0032                  13             PREVFILL EQU 32H                ; zapamiętanie poprzedniego wypełnienia
-  00F2                  14             TLOW EQU 0F2H
-  00FF                  15             THIGH EQU 0FFH                  ; stałe timera
-0302 859030             16             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
-0305 0530               17             INC COUNTER                     ; timer przesunięty o 1 (odliczanie od 1 do T+1)
-0307 858031             18             MOV PREVPERIOD, P0
-030A 859032             19             MOV PREVFILL, P1                ; początkowe wartości
-030D C2A0               20             CLR P2.0                        ; zacznij od stanu niskiego
-030F 758901             21             MOV TMOD, #01h                  ; 16-bit timer
-0312 758AF2             22             MOV TL0, #TLOW
-0315 758CFF             23             MOV TH0, #THIGH                 ; czas timera
-0318 D28C               24             SETB TR0                        ; zacznij liczyć
-031A D2A9               25             SETB ET0                        ; maska timera
-031C D2AF               26             SETB EA                         ; maska główna
-031E 02031E             27     MAIN:   LJMP MAIN                       ; mądry program
-                        28
-                        29     ORG 0000Bh
+                         4     ; LEGENDA:
+                         5
+                         6     ; P0 - okres (T)
+                         7     ; P1 - wypełnienie (F)
+                         8     ; F0 - if 0 odliczaj wypełnienie ||| else odliczaj do okresu
+                         9     ; AHI (cały czas stan wysoki) - 1 if F >= T ||| else 0
+                        10     ; P2.0 - wyjście
+                        11
+                        12     ORG 0300H
+0300 D2D5               13     INIT:   SETB F0                         ; najpierw odlicz do okresu
+                        14     AHI:    DBIT 1                          ; Always High - 1 jeśli T <= F wpp. 0
+****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
+  0030                  15             COUNTER EQU 30H                 ; adres licznika
+  0031                  16             PREVPERIOD EQU 31H              ; zapamiętanie poprzedniego okresu
+  0032                  17             PREVFILL EQU 32H                ; zapamiętanie poprzedniego wypełnienia
+  00F2                  18             TLOW EQU 0F2H
+  00FF                  19             THIGH EQU 0FFH                  ; stałe timera
+0302 859030             20             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
+0305 0530               21             INC COUNTER                     ; timer przesunięty o 1 (odliczanie od 1 do T+1)
+0307 858031             22             MOV PREVPERIOD, P0
+030A 859032             23             MOV PREVFILL, P1                ; początkowe wartości
+030D E580               24             MOV A, P0
+030F 9590               25             SUBB A, P1                      ; Czy T < F
+0311 5007               26             JNC ISEQU                       ; Jeśli nie to jump do ISEQU
+0313 D2A0               27     BEGHI:  SETB P2.0                       ; stan wysoki na wyjściu
+0315 D200               28             SETB AHI                        ; Always High
+0317 020326             29             LJMP CONT
+031A E580               30     ISEQU:  MOV A, P0
+031C B59003             31             CJNE A, P1, BEGLOW              ; Czy T != F
+031F 020313             32             LJMP BEGHI                      ; T == F - takie same czynności jakby T < F
+0322 C2A0               33     BEGLOW: CLR P2.0                        ; stan niski na wyjściu
+0324 C200               34             CLR AHI                         ; Not Always High
+0326 758901             35     CONT:   MOV TMOD, #01h                  ; 16-bit timer
+0329 758AF2             36             MOV TL0, #TLOW
+032C 758CFF             37             MOV TH0, #THIGH                 ; czas timera
+032F D28C               38             SETB TR0                        ; zacznij liczyć
+0331 D2A9               39             SETB ET0                        ; maska timera
+0333 D2AF               40             SETB EA                         ; maska główna
+0335 020335             41     MAIN:   LJMP MAIN                       ; mądry program
+                        42
+                        43     ORG 0000Bh
 ****WARNING:ThisORGhaslowervaluethanthepreviousone
-000B 020400             30             LJMP TIMI
-                        31
-                        32     ORG 0400h
-0400 758AF2             33     TIMI:   MOV TL0, #TLOW
-0403 758CFF             34             MOV TH0, #THIGH                 ; czas timera
-0406 E580               35             MOV A, P0
-0408 B5310B             36             CJNE A, PREVPERIOD, RESET
-040B E590               37             MOV A, P1
-040D B53206             38             CJNE A, PREVFILL, RESET
-0410 20D511             39             JB F0, PERIOD
-0413 020435             40             LJMP FILL
-                        41
-0416 D2D5               42     RESET:  SETB F0
-0418 859030             43             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
-041B 858031             44             MOV PREVPERIOD, P0
-041E 859032             45             MOV PREVFILL, P1                ; początkowe wartości
-0421 C2A0               46             CLR P2.0                        ; zacznij od stanu niskiego
-0423 32                 47             RETI
-                        48
-0424 E530               49     PERIOD: MOV A, COUNTER
-0426 9580               50             SUBB A, P0
-0428 4008               51             JC SKIPP
-042A D2A0               52             SETB P2.0
-042C 753001             53             MOV COUNTER, #01H
-042F C2D5               54             CLR F0
-0431 32                 55             RETI
-                        56
-0432 0530               57     SKIPP:  INC COUNTER
-0434 32                 58             RETI
-                        59
-0435 E530               60     FILL:   MOV A, COUNTER
-0437 9590               61             SUBB A, P1
-0439 4004               62             JC SKIPF
-043B C2A0               63             CLR P2.0
-043D D2D5               64             SETB F0
-043F 0530               65     SKIPF:  INC COUNTER
-0441 32                 66             RETI
-****WARNING:Missing`END'directive
+000B 020400             44             LJMP TIMI
+                        45
+                        46     ORG 0400h
+0400 758AF2             47     TIMI:   MOV TL0, #TLOW
+0403 758CFF             48             MOV TH0, #THIGH                 ; czas timera
+0406 E580               49             MOV A, P0
+0408 B5310F             50             CJNE A, PREVPERIOD, RESET       ; Czy wartość T się zmieniła
+040B E590               51             MOV A, P1
+040D B5320A             52             CJNE A, PREVFILL, RESET         ; Czy wartość F się zmieniła
+0410 200006             53             JB AHI, RETURN                  ; Jeśli Always High to nie przejmuj się niczym więcej
+0413 20D529             54             JB F0, PERIOD                   ; Aktualnie - odliczanie okresu
+0416 020450             55             LJMP FILL                       ; Aktualnie - odliczanie wypełnienia
+0419 32                 56     RETURN: RETI
+                        57
+041A D2D5               58     RESET:  SETB F0                         ; najpierw odlicz do okresu
+041C 859030             59             MOV COUNTER, P1                 ; zacznij od odliczania do okresu
+041F 0530               60             INC COUNTER                     ; timer przesunięty o 1 (odliczanie od 1 do T+1)
+0421 858031             61             MOV PREVPERIOD, P0
+0424 859032             62             MOV PREVFILL, P1                ; początkowe wartości
+0427 E580               63             MOV A, P0
+0429 9590               64             SUBB A, P1                      ; Czy T < F
+042B 5005               65             JNC SETEQU                      ; Jump to SETEQU jeśli nie
+042D D2A0               66     SETHI:  SETB P2.0                       ; Stan wysoki na wyjściu
+042F D200               67             SETB AHI                        ; Always High
+0431 32                 68             RETI
+0432 E580               69     SETEQU: MOV A, P0
+0434 B59003             70             CJNE A, P1, SETLOW              ; Czy T == F
+0437 02042D             71             LJMP SETHI                      ; T == F - sekwencja taka jak przy SETHI
+043A C2A0               72     SETLOW: CLR P2.0                        ; zacznij od stanu niskiego
+043C C200               73             CLR AHI                         ; not Always High
+043E 32                 74             RETI
+                        75
+043F E530               76     PERIOD: MOV A, COUNTER
+0441 9580               77             SUBB A, P0                      ; Czy COUNTER > T
+0443 4008               78             JC SKIPP                        ; nie
+0445 D2A0               79             SETB P2.0                       ; stan wysoki na wyjściu
+0447 753001             80             MOV COUNTER, #01H               ; Odliczanie od 1 do T+1
+044A C2D5               81             CLR F0                          ; odliczaj do wypełnienia
+044C 32                 82             RETI
+                        83
+044D 0530               84     SKIPP:  INC COUNTER                     ; inkrementuj COUNTER i return
+044F 32                 85             RETI
+                        86
+0450 E530               87     FILL:   MOV A, COUNTER
+0452 9590               88             SUBB A, P1                      ; Czy COUNTER > F
+0454 4004               89             JC SKIPF                        ; nie
+0456 C2A0               90             CLR P2.0                        ; stan niski na wyjściu
+0458 D2D5               91             SETB F0                         ; odliczaj do okresu
+045A 0530               92     SKIPF:  INC COUNTER                     ; inkrementuj COUNTER i reti
+045C 32                 93             RETI
+                        94
+                        95     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 29, WARNING:ThisORGhaslowervaluethanthepreviousone
-Line 67, WARNING:Missing`END'directive
+Line 14, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
+Line 44, WARNING:ThisORGhaslowervaluethanthepreviousone
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -85,11 +114,14 @@ ADCLK. . . . . . . . . . . . . . . .  D  ADDR  00F2H  NOT USED
 ADCON. . . . . . . . . . . . . . . .  D  ADDR  00F3H  NOT USED
 ADDH . . . . . . . . . . . . . . . .  D  ADDR  00F5H  NOT USED
 ADDL . . . . . . . . . . . . . . . .  D  ADDR  00F4H  NOT USED
+AHI. . . . . . . . . . . . . . . . .  B  ADDR  0000H
 AUXR . . . . . . . . . . . . . . . .  D  ADDR  008EH  NOT USED
 AUXR1. . . . . . . . . . . . . . . .  D  ADDR  00A2H  NOT USED
 B. . . . . . . . . . . . . . . . . .  D  ADDR  00F0H  NOT USED
 BDRCON . . . . . . . . . . . . . . .  D  ADDR  009BH  NOT USED
 BDRCON_1 . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
+BEGHI. . . . . . . . . . . . . . . .  C  ADDR  0313H
+BEGLOW . . . . . . . . . . . . . . .  C  ADDR  0322H
 BRL. . . . . . . . . . . . . . . . .  D  ADDR  009AH  NOT USED
 CCAP0H . . . . . . . . . . . . . . .  D  ADDR  00FAH  NOT USED
 CCAP0L . . . . . . . . . . . . . . .  D  ADDR  00EAH  NOT USED
@@ -124,6 +156,7 @@ CKSEL. . . . . . . . . . . . . . . .  D  ADDR  0085H  NOT USED
 CL . . . . . . . . . . . . . . . . .  D  ADDR  00E9H  NOT USED
 CLKREG . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CMOD . . . . . . . . . . . . . . . .  D  ADDR  00D9H  NOT USED
+CONT . . . . . . . . . . . . . . . .  C  ADDR  0326H
 COUNTER. . . . . . . . . . . . . . .  N  NUMB  0030H
 CPRL2. . . . . . . . . . . . . . . .  B  ADDR  00C8H  NOT USED
 CR . . . . . . . . . . . . . . . . .  B  ADDR  00DEH  NOT USED
@@ -150,7 +183,7 @@ EXTI0. . . . . . . . . . . . . . . .  C  ADDR  0003H  NOT USED
 EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
-FILL . . . . . . . . . . . . . . . .  C  ADDR  0435H
+FILL . . . . . . . . . . . . . . . .  C  ADDR  0450H
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
@@ -163,12 +196,13 @@ IPH0 . . . . . . . . . . . . . . . .  D  ADDR  00B7H  NOT USED
 IPH1 . . . . . . . . . . . . . . . .  D  ADDR  00B3H  NOT USED
 IPL0 . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPL1 . . . . . . . . . . . . . . . .  D  ADDR  00B2H  NOT USED
+ISEQU. . . . . . . . . . . . . . . .  C  ADDR  031AH
 IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H  NOT USED
 IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-MAIN . . . . . . . . . . . . . . . .  C  ADDR  031EH
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  0335H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -186,7 +220,7 @@ P4M2 . . . . . . . . . . . . . . . .  D  ADDR  00E4H  NOT USED
 P5 . . . . . . . . . . . . . . . . .  D  ADDR  00E8H  NOT USED
 PC . . . . . . . . . . . . . . . . .  B  ADDR  00BEH  NOT USED
 PCON . . . . . . . . . . . . . . . .  D  ADDR  0087H  NOT USED
-PERIOD . . . . . . . . . . . . . . .  C  ADDR  0424H
+PERIOD . . . . . . . . . . . . . . .  C  ADDR  043FH
 PPCL . . . . . . . . . . . . . . . .  B  ADDR  00BEH  NOT USED
 PREVFILL . . . . . . . . . . . . . .  N  NUMB  0032H
 PREVPERIOD . . . . . . . . . . . . .  N  NUMB  0031H
@@ -210,7 +244,8 @@ RCLK . . . . . . . . . . . . . . . .  B  ADDR  00CDH  NOT USED
 RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H
-RESET. . . . . . . . . . . . . . . .  C  ADDR  0416H  NOT USED
+RESET. . . . . . . . . . . . . . . .  C  ADDR  041AH  NOT USED
+RETURN . . . . . . . . . . . . . . .  C  ADDR  0419H
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
@@ -223,9 +258,12 @@ SADEN_0. . . . . . . . . . . . . . .  D  ADDR  00B9H  NOT USED
 SADEN_1. . . . . . . . . . . . . . .  D  ADDR  00BAH  NOT USED
 SBUF . . . . . . . . . . . . . . . .  D  ADDR  0099H  NOT USED
 SCON . . . . . . . . . . . . . . . .  D  ADDR  0098H  NOT USED
+SETEQU . . . . . . . . . . . . . . .  C  ADDR  0432H
+SETHI. . . . . . . . . . . . . . . .  C  ADDR  042DH
+SETLOW . . . . . . . . . . . . . . .  C  ADDR  043AH
 SINT . . . . . . . . . . . . . . . .  C  ADDR  0023H  NOT USED
-SKIPF. . . . . . . . . . . . . . . .  C  ADDR  043FH
-SKIPP. . . . . . . . . . . . . . . .  C  ADDR  0432H
+SKIPF. . . . . . . . . . . . . . . .  C  ADDR  045AH
+SKIPP. . . . . . . . . . . . . . . .  C  ADDR  044DH
 SM0. . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 SM1. . . . . . . . . . . . . . . . .  B  ADDR  009EH  NOT USED
 SM2. . . . . . . . . . . . . . . . .  B  ADDR  009DH  NOT USED
