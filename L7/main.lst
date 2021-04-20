@@ -9,54 +9,48 @@ main                                                                            
   00F2                   8             TLOW EQU 0F2H
   00FF                   9             THIGH EQU 0FFH
   0030                  10             COUNTER EQU 030H
-  0031                  11             MEMC EQU 031H
-  0032                  12             MEML EQU 032H
-  0080                  13             MEMH EQU 080H
-0200 850030             14             MOV COUNTER, 00H
-0203 753132             15             MOV MEMC, #MEML
-0206 C2D5               16             CLR F0
-0208 309002             17             JNB P1.0, SKIP
-020B D2D5               18             SETB F0
-020D 758AF2             19     SKIP:   MOV TL0, #TLOW
+0200 850030             11             MOV COUNTER, 00H
+0203 900000             12             MOV DPTR, #00H
+0206 C2D5               13             CLR F0
+0208 309002             14             JNB P1.0, SKIP
+020B D2D5               15             SETB F0
+020D 758AF2             16     SKIP:   MOV TL0, #TLOW
 ****WARNING:Reservedkeywordusedaslabel
-0210 758CFF             20             MOV TH0, #THIGH                 ; czas timera
-0213 D28C               21             SETB TR0                        ; zacznij liczyć
-0215 D2A9               22             SETB ET0                        ; maska timera
-0217 D2AF               23             SETB EA                         ; maska główna
-0219 020219             24     MAIN:   LJMP MAIN                       ; mądry program
-                        25
-                        26     ORG 0000Bh
+0210 758CFF             17             MOV TH0, #THIGH                 ; czas timera
+0213 D28C               18             SETB TR0                        ; zacznij liczyć
+0215 D2A9               19             SETB ET0                        ; maska timera
+0217 D2AF               20             SETB EA                         ; maska główna
+0219 020219             21     MAIN:   LJMP MAIN                       ; mądry program
+                        22
+                        23     ORG 0000Bh
 ****WARNING:ThisORGhaslowervaluethanthepreviousone
-000B 020300             27             LJMP TIMI
-                        28
-                        29     ORG 0300H
-0300 758AF2             30     TIMI:   MOV TL0, #TLOW
-0303 758CFF             31             MOV TH0, #THIGH
-0306 0530               32             INC COUNTER
-0308 20D504             33             JB F0, F0BIT
-030B 209005             34     F0CLR:  JB P1.0, CHNG
-030E 32                 35             RETI
+000B 020300             24             LJMP TIMI
+                        25
+                        26     ORG 0300H
+0300 758AF2             27     TIMI:   MOV TL0, #TLOW
+0303 758CFF             28             MOV TH0, #THIGH
+0306 0530               29             INC COUNTER
+0308 20D504             30             JB F0, F0BIT
+030B 209005             31     F0CLR:  JB P1.0, CHNG
+030E 32                 32             RETI
+                        33
+030F 309001             34     F0BIT:  JNB P1.0, CHNG
+0312 32                 35             RETI
                         36
-030F 309001             37     F0BIT:  JNB P1.0, CHNG
-0312 32                 38             RETI
-                        39
-0313 B2D5               40     CHNG:   CPL F0
-0315 A831               41             MOV R0, MEMC
-0317 A630               42             MOV @R0, COUNTER
-0319 753000             43             MOV COUNTER, #00H
-031C 0531               44             INC MEMC
-031E E531               45             MOV A, MEMC
-0320 B48003             46             CJNE A, #MEMH, ENDCH
-0323 753132             47             MOV MEMC, #MEML
-0326 32                 48     ENDCH:  RETI
-                        49
-                        50     END
+0313 B2D5               37     CHNG:   CPL F0
+0315 E530               38             MOV A, COUNTER
+0317 F0                 39             MOVX @DPTR, A
+0318 753000             40             MOV COUNTER, #00H
+031B A3                 41             INC DPTR
+031C 32                 42             RETI
+                        43
+                        44     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 19, WARNING:Reservedkeywordusedaslabel
-Line 27, WARNING:ThisORGhaslowervaluethanthepreviousone
+Line 16, WARNING:Reservedkeywordusedaslabel
+Line 24, WARNING:ThisORGhaslowervaluethanthepreviousone
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -123,7 +117,6 @@ DPL. . . . . . . . . . . . . . . . .  D  ADDR  0082H  NOT USED
 EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH
 EC . . . . . . . . . . . . . . . . .  B  ADDR  00AEH  NOT USED
 EECON. . . . . . . . . . . . . . . .  D  ADDR  0096H  NOT USED
-ENDCH. . . . . . . . . . . . . . . .  C  ADDR  0326H
 ES . . . . . . . . . . . . . . . . .  B  ADDR  00ACH  NOT USED
 ET0. . . . . . . . . . . . . . . . .  B  ADDR  00A9H
 ET1. . . . . . . . . . . . . . . . .  B  ADDR  00ABH  NOT USED
@@ -156,9 +149,6 @@ KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
 MAIN . . . . . . . . . . . . . . . .  C  ADDR  0219H
-MEMC . . . . . . . . . . . . . . . .  N  NUMB  0031H
-MEMH . . . . . . . . . . . . . . . .  N  NUMB  0080H
-MEML . . . . . . . . . . . . . . . .  N  NUMB  0032H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
