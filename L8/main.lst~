@@ -1,57 +1,84 @@
 main                                                                                                                    PAGE 1
-                         1     ORG 0000H
-0000 020200              2             LJMP INIT
-                         3
-                         4     ; F0 - stan w poprzednim ticku
-                         5     ; P1.0 - zadany pin
+                         1     ORG 0900H
+0900 B7                  2     SCODE:  DB 10110111B
+0901 D7                  3             DB 11010111B
+0902 DE                  4             DB 11011110B
+0903 EB                  5             DB 11101011B
                          6
-                         7     ORG 0200H
-                         8     INIT:
-  00F2                   9             TLOW EQU 0F2H
-  00FF                  10             THIGH EQU 0FFH
-  0030                  11             COUNTER EQU 030H
-0200 850030             12             MOV COUNTER, 00H
-0203 900000             13             MOV DPTR, #00H
-0206 C2D5               14             CLR F0
-0208 309002             15             JNB P1.0, SKIP
-020B D2D5               16             SETB F0
-020D 758AF2             17     SKIP:   MOV TL0, #TLOW
-****WARNING:Reservedkeywordusedaslabel
-0210 758CFF             18             MOV TH0, #THIGH                 ; czas timera
-0213 D28C               19             SETB TR0                        ; zacznij liczyć
-0215 D2A9               20             SETB ET0                        ; maska timera
-0217 D2AF               21             SETB EA                         ; maska główna
-0219 020219             22     MAIN:   LJMP MAIN                       ; mądry program
-                        23
-                        24     ORG 0000Bh
+                         7     ; F0 - 1 jeśli poprawny kod, 0 jeśli nie poprawny
+                         8     ; P2.1 - SUCCESS
+                         9     ; P2.0 - FAIL
+                        10     ; P1 - klawiatura macierzowa
+                        11
+                        12     ORG 0000H
 ****WARNING:ThisORGhaslowervaluethanthepreviousone
-000B 020300             25             LJMP TIMI
-                        26
-                        27     ORG 0300H
-0300 758AF2             28     TIMI:   MOV TL0, #TLOW
-0303 758CFF             29             MOV TH0, #THIGH
-0306 0530               30             INC COUNTER
-0308 20D504             31             JB F0, F0BIT
-030B 209005             32     F0CLR:  JB P1.0, CHNG
-030E 32                 33             RETI
-                        34
-030F 309001             35     F0BIT:  JNB P1.0, CHNG
-0312 32                 36             RETI
-                        37
-0313 B2D5               38     CHNG:   CPL F0
-0315 E530               39             MOV A, COUNTER
-0317 F0                 40             MOVX @DPTR, A
-0318 753000             41             MOV COUNTER, #00H
-031B A3                 42             INC DPTR
-031C 32                 43             RETI
-                        44
-                        45     END
+0000 020100             13             LJMP INIT
+                        14
+                        15     ORG 0100h
+0100 900900             16     INIT:   MOV DPTR, #SCODE
+  0030                  17             COUNTER EQU 030H
+  0031                  18             QUERY EQU 031H
+                        19     CLEAR:  DBIT 1
+****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
+  007F                  20             INIQUERY EQU 01111111B
+  0004                  21             ITERNUM EQU 04D
+0103 D2D5               22     MAIN:   SETB F0                 ; załóż, że kod poprawny
+0105 753000             23             MOV COUNTER, #00H       ; reset countera
+0108 020131             24     ITER:   LJMP WAIT_FOR_INPUT     ; czekaj dopóty pusty numpad
+010B E530               25     ENDW:   MOV A, COUNTER
+010D 93                 26             MOVC A, @A+DPTR         ; A <- kolejna wartość kodu
+010E B59003             27             CJNE A, P1, NOFUT       ; A != P1 - no future
+0111 020116             28             LJMP CONT               ; na razie wszystko ok
+0114 C2D5               29     NOFUT:  CLR F0                  ; F0 <- 0 - błędny kod
+0116 02014A             30     CONT:   LJMP WAIT_FOR_EMPTY     ; poczekaj aż numpad bedzie wyzerowany
+0119 0530               31     ENDV:   INC COUNTER
+011B E530               32             MOV A, COUNTER
+011D B404E8             33             CJNE A, #ITERNUM, ITER  ; Czy koniec iterowania - 4 cyfry sprawdzone
+0120 30D507             34             JNB F0, FAIL            ; wprowadzono zły kod
+0123 D2A1               35             SETB P2.1
+0125 C2A0               36             CLR P2.0
+0127 020103             37             LJMP MAIN
+012A D2A0               38     FAIL:   SETB P2.0
+012C C2A1               39             CLR P2.1
+012E 020103             40             LJMP MAIN
+                        41
+                        42     WAIT_FOR_INPUT:
+0131 75317F             43             MOV QUERY, #INIQUERY
+0134 E531               44     QAG1:   MOV A, QUERY            ; rotacja QUERY
+0136 23                 45             RL A                    ; rotacja QUERY
+0137 F531               46             MOV QUERY, A            ; rotacja QUERY
+0139 E531               47             MOV A, QUERY
+013B F590               48             MOV P1, A               ; odpytaj numpad
+013D E590               49             MOV A, P1               ; wynik w A
+013F B53103             50             CJNE A, QUERY, ENDF     ; A != QUERY - coś zaznaczono
+0142 020134             51             LJMP QAG1
+0145 F590               52     ENDF:   MOV P1, A
+0147 02010B             53             LJMP ENDW
+                        54
+                        55     WAIT_FOR_EMPTY:
+014A 75317F             56             MOV QUERY, #INIQUERY
+014D C200               57             CLR CLEAR               ; załóż, że numpad jest wyczyszczony
+014F E531               58     AGAIN:  MOV A, QUERY
+0151 F590               59             MOV P1, A               ; odpytaj numpad
+0153 E590               60             MOV A, P1               ; wynik w A
+0155 B53103             61             CJNE A, QUERY, STH      ; A != QUERY - coś zaznaczono
+0158 02015D             62             LJMP ROT                ; na razie wszystko w porządku
+015B D200               63     STH:    SETB CLEAR
+015D E531               64     ROT:    MOV A, QUERY            ; rotacja QUERY
+015F 23                 65             RL A                    ; rotacja QUERY
+0160 F531               66             MOV QUERY, A            ; rotacja QUERY
+0162 747F               67             MOV A, #INIQUERY
+0164 B531E8             68             CJNE A, QUERY, AGAIN    ; Jeśli query != początkowe query to kontynuuj
+0167 2000E0             69             JB CLEAR, WAIT_FOR_EMPTY ; CLEAR == 1 - numpad nie wyczyszczony
+016A 020119             70             LJMP ENDV
+                        71
+                        72     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 17, WARNING:Reservedkeywordusedaslabel
-Line 25, WARNING:ThisORGhaslowervaluethanthepreviousone
+Line 12, WARNING:ThisORGhaslowervaluethanthepreviousone
+Line 20, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -64,6 +91,7 @@ ADCLK. . . . . . . . . . . . . . . .  D  ADDR  00F2H  NOT USED
 ADCON. . . . . . . . . . . . . . . .  D  ADDR  00F3H  NOT USED
 ADDH . . . . . . . . . . . . . . . .  D  ADDR  00F5H  NOT USED
 ADDL . . . . . . . . . . . . . . . .  D  ADDR  00F4H  NOT USED
+AGAIN. . . . . . . . . . . . . . . .  C  ADDR  014FH
 AUXR . . . . . . . . . . . . . . . .  D  ADDR  008EH  NOT USED
 AUXR1. . . . . . . . . . . . . . . .  D  ADDR  00A2H  NOT USED
 B. . . . . . . . . . . . . . . . . .  D  ADDR  00F0H  NOT USED
@@ -96,14 +124,15 @@ CCF4 . . . . . . . . . . . . . . . .  B  ADDR  00DCH  NOT USED
 CCON . . . . . . . . . . . . . . . .  D  ADDR  00D8H  NOT USED
 CFINT. . . . . . . . . . . . . . . .  C  ADDR  0033H  NOT USED
 CH . . . . . . . . . . . . . . . . .  D  ADDR  00F9H  NOT USED
-CHNG . . . . . . . . . . . . . . . .  C  ADDR  0313H
 CKCON. . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CKCON0 . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CKRL . . . . . . . . . . . . . . . .  D  ADDR  0097H  NOT USED
 CKSEL. . . . . . . . . . . . . . . .  D  ADDR  0085H  NOT USED
 CL . . . . . . . . . . . . . . . . .  D  ADDR  00E9H  NOT USED
+CLEAR. . . . . . . . . . . . . . . .  B  ADDR  0000H
 CLKREG . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CMOD . . . . . . . . . . . . . . . .  D  ADDR  00D9H  NOT USED
+CONT . . . . . . . . . . . . . . . .  C  ADDR  0116H
 COUNTER. . . . . . . . . . . . . . .  N  NUMB  0030H
 CPRL2. . . . . . . . . . . . . . . .  B  ADDR  00C8H  NOT USED
 CR . . . . . . . . . . . . . . . . .  B  ADDR  00DEH  NOT USED
@@ -115,11 +144,14 @@ DP1H . . . . . . . . . . . . . . . .  D  ADDR  0085H  NOT USED
 DP1L . . . . . . . . . . . . . . . .  D  ADDR  0084H  NOT USED
 DPH. . . . . . . . . . . . . . . . .  D  ADDR  0083H  NOT USED
 DPL. . . . . . . . . . . . . . . . .  D  ADDR  0082H  NOT USED
-EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH
+EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH  NOT USED
 EC . . . . . . . . . . . . . . . . .  B  ADDR  00AEH  NOT USED
 EECON. . . . . . . . . . . . . . . .  D  ADDR  0096H  NOT USED
+ENDF . . . . . . . . . . . . . . . .  C  ADDR  0145H
+ENDV . . . . . . . . . . . . . . . .  C  ADDR  0119H
+ENDW . . . . . . . . . . . . . . . .  C  ADDR  010BH
 ES . . . . . . . . . . . . . . . . .  B  ADDR  00ACH  NOT USED
-ET0. . . . . . . . . . . . . . . . .  B  ADDR  00A9H
+ET0. . . . . . . . . . . . . . . . .  B  ADDR  00A9H  NOT USED
 ET1. . . . . . . . . . . . . . . . .  B  ADDR  00ABH  NOT USED
 ET2. . . . . . . . . . . . . . . . .  B  ADDR  00ADH  NOT USED
 EX0. . . . . . . . . . . . . . . . .  B  ADDR  00A8H  NOT USED
@@ -129,13 +161,13 @@ EXF2 . . . . . . . . . . . . . . . .  B  ADDR  00CEH  NOT USED
 EXTI0. . . . . . . . . . . . . . . .  C  ADDR  0003H  NOT USED
 EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H
-F0BIT. . . . . . . . . . . . . . . .  C  ADDR  030FH
-F0CLR. . . . . . . . . . . . . . . .  C  ADDR  030BH  NOT USED
+FAIL . . . . . . . . . . . . . . . .  C  ADDR  012AH
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
-INIT . . . . . . . . . . . . . . . .  C  ADDR  0200H
+INIQUERY . . . . . . . . . . . . . .  N  NUMB  007FH
+INIT . . . . . . . . . . . . . . . .  C  ADDR  0100H
 INT0 . . . . . . . . . . . . . . . .  B  ADDR  00B2H  NOT USED
 INT1 . . . . . . . . . . . . . . . .  B  ADDR  00B3H  NOT USED
 IP . . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
@@ -146,10 +178,13 @@ IPL0 . . . . . . . . . . . . . . . .  D  ADDR  00B8H  NOT USED
 IPL1 . . . . . . . . . . . . . . . .  D  ADDR  00B2H  NOT USED
 IT0. . . . . . . . . . . . . . . . .  B  ADDR  0088H  NOT USED
 IT1. . . . . . . . . . . . . . . . .  B  ADDR  008AH  NOT USED
+ITER . . . . . . . . . . . . . . . .  C  ADDR  0108H
+ITERNUM. . . . . . . . . . . . . . .  N  NUMB  0004H
 KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
-MAIN . . . . . . . . . . . . . . . .  C  ADDR  0219H
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  0103H
+NOFUT. . . . . . . . . . . . . . . .  C  ADDR  0114H
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -157,7 +192,7 @@ P0 . . . . . . . . . . . . . . . . .  D  ADDR  0080H  NOT USED
 P1 . . . . . . . . . . . . . . . . .  D  ADDR  0090H
 P1M1 . . . . . . . . . . . . . . . .  D  ADDR  00D4H  NOT USED
 P1M2 . . . . . . . . . . . . . . . .  D  ADDR  00E2H  NOT USED
-P2 . . . . . . . . . . . . . . . . .  D  ADDR  00A0H  NOT USED
+P2 . . . . . . . . . . . . . . . . .  D  ADDR  00A0H
 P3 . . . . . . . . . . . . . . . . .  D  ADDR  00B0H  NOT USED
 P3M1 . . . . . . . . . . . . . . . .  D  ADDR  00D5H  NOT USED
 P3M2 . . . . . . . . . . . . . . . .  D  ADDR  00E3H  NOT USED
@@ -181,6 +216,8 @@ PX0. . . . . . . . . . . . . . . . .  B  ADDR  00B8H  NOT USED
 PX0L . . . . . . . . . . . . . . . .  B  ADDR  00B8H  NOT USED
 PX1. . . . . . . . . . . . . . . . .  B  ADDR  00BAH  NOT USED
 PX1L . . . . . . . . . . . . . . . .  B  ADDR  00BAH  NOT USED
+QAG1 . . . . . . . . . . . . . . . .  C  ADDR  0134H
+QUERY. . . . . . . . . . . . . . . .  N  NUMB  0031H
 RB8. . . . . . . . . . . . . . . . .  B  ADDR  009AH  NOT USED
 RCAP2H . . . . . . . . . . . . . . .  D  ADDR  00CBH  NOT USED
 RCAP2L . . . . . . . . . . . . . . .  D  ADDR  00CAH  NOT USED
@@ -189,6 +226,7 @@ RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H  NOT USED
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
+ROT. . . . . . . . . . . . . . . . .  C  ADDR  015DH
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
 RXD. . . . . . . . . . . . . . . . .  B  ADDR  00B0H  NOT USED
@@ -199,9 +237,9 @@ SADEN. . . . . . . . . . . . . . . .  D  ADDR  00B9H  NOT USED
 SADEN_0. . . . . . . . . . . . . . .  D  ADDR  00B9H  NOT USED
 SADEN_1. . . . . . . . . . . . . . .  D  ADDR  00BAH  NOT USED
 SBUF . . . . . . . . . . . . . . . .  D  ADDR  0099H  NOT USED
+SCODE. . . . . . . . . . . . . . . .  C  ADDR  0900H
 SCON . . . . . . . . . . . . . . . .  D  ADDR  0098H  NOT USED
 SINT . . . . . . . . . . . . . . . .  C  ADDR  0023H  NOT USED
-SKIP . . . . . . . . . . . . . . . .  C  ADDR  020DH
 SM0. . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 SM1. . . . . . . . . . . . . . . . .  B  ADDR  009EH  NOT USED
 SM2. . . . . . . . . . . . . . . . .  B  ADDR  009DH  NOT USED
@@ -212,6 +250,7 @@ SPDAT. . . . . . . . . . . . . . . .  D  ADDR  00C5H  NOT USED
 SPDR . . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 SPSR . . . . . . . . . . . . . . . .  D  ADDR  00AAH  NOT USED
 SPSTA. . . . . . . . . . . . . . . .  D  ADDR  00C4H  NOT USED
+STH. . . . . . . . . . . . . . . . .  C  ADDR  015BH
 T0 . . . . . . . . . . . . . . . . .  B  ADDR  00B4H  NOT USED
 T1 . . . . . . . . . . . . . . . . .  B  ADDR  00B5H  NOT USED
 T2CON. . . . . . . . . . . . . . . .  D  ADDR  00C8H  NOT USED
@@ -222,24 +261,23 @@ TCON . . . . . . . . . . . . . . . .  D  ADDR  0088H  NOT USED
 TF0. . . . . . . . . . . . . . . . .  B  ADDR  008DH  NOT USED
 TF1. . . . . . . . . . . . . . . . .  B  ADDR  008FH  NOT USED
 TF2. . . . . . . . . . . . . . . . .  B  ADDR  00CFH  NOT USED
-TH0. . . . . . . . . . . . . . . . .  D  ADDR  008CH
+TH0. . . . . . . . . . . . . . . . .  D  ADDR  008CH  NOT USED
 TH1. . . . . . . . . . . . . . . . .  D  ADDR  008DH  NOT USED
 TH2. . . . . . . . . . . . . . . . .  D  ADDR  00CDH  NOT USED
-THIGH. . . . . . . . . . . . . . . .  N  NUMB  00FFH
 TI . . . . . . . . . . . . . . . . .  B  ADDR  0099H  NOT USED
 TIMER0 . . . . . . . . . . . . . . .  C  ADDR  000BH  NOT USED
 TIMER1 . . . . . . . . . . . . . . .  C  ADDR  001BH  NOT USED
 TIMER2 . . . . . . . . . . . . . . .  C  ADDR  002BH  NOT USED
-TIMI . . . . . . . . . . . . . . . .  C  ADDR  0300H
-TL0. . . . . . . . . . . . . . . . .  D  ADDR  008AH
+TL0. . . . . . . . . . . . . . . . .  D  ADDR  008AH  NOT USED
 TL1. . . . . . . . . . . . . . . . .  D  ADDR  008BH  NOT USED
 TL2. . . . . . . . . . . . . . . . .  D  ADDR  00CCH  NOT USED
-TLOW . . . . . . . . . . . . . . . .  N  NUMB  00F2H
 TMOD . . . . . . . . . . . . . . . .  D  ADDR  0089H  NOT USED
-TR0. . . . . . . . . . . . . . . . .  B  ADDR  008CH
+TR0. . . . . . . . . . . . . . . . .  B  ADDR  008CH  NOT USED
 TR1. . . . . . . . . . . . . . . . .  B  ADDR  008EH  NOT USED
 TR2. . . . . . . . . . . . . . . . .  B  ADDR  00CAH  NOT USED
 TXD. . . . . . . . . . . . . . . . .  B  ADDR  00B1H  NOT USED
+WAIT_FOR_EMPTY . . . . . . . . . . .  C  ADDR  014AH
+WAIT_FOR_INPUT . . . . . . . . . . .  C  ADDR  0131H
 WDTCON . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTPRG . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTRST . . . . . . . . . . . . . . .  D  ADDR  00A6H  NOT USED
