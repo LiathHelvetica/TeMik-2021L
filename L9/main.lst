@@ -4,7 +4,7 @@ main                                                                            
                          3
                          4     ; P3.2 - przycisk sterowania
                          5     ORG 00003h
-0003 02033F              6             LJMP STER
+0003 020338              6             LJMP STER
                          7
                          8     ORG 0000Bh
 000B 020300              9             LJMP TIMI
@@ -22,71 +22,69 @@ main                                                                            
   0000                  21             CLOSED EQU 00000000B
   00F2                  22             TLOW EQU 0F2H
   00FF                  23             THIGH EQU 0FFH
-                        24     STOP:   DBIT 1
+  0002                  24             TWO EQU 00000010B
+                        25     STOP:   DBIT 1
 ****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-                        25     OPEN:   DBIT 1
+                        26     OPEN:   DBIT 1
 ****WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-0100 D200               26             SETB STOP
-0102 C201               27             CLR OPEN
-0104 759000             28             MOV P1, #CLOSED
-0107 758AF2             29             MOV TL0, #TLOW
-010A 758CFF             30             MOV TH0, #THIGH                 ; czas timera
-010D D28C               31             SETB TR0                        ; zacznij liczyć
-010F D288               32             SETB IT0                        ; przerwania na zboczu
-0111 D2A9               33             SETB ET0                        ; maska timera
-0113 D2A8               34             SETB EX0                        ; maska P3.2 (reset)
-0115 D2B8               35             SETB PX0                        ; wysoki priorytet przycisków
-0117 C2B9               36             CLR PT0                         ; niski priorytet timera
-0119 D2AF               37             SETB EA                         ; maska główna
-011B 02011B             38     MAIN:   LJMP MAIN
-                        39
-                        40     ORG 0300H
-0300 758AF2             41     TIMI:   MOV TL0, #TLOW
-0303 758CFF             42             MOV TH0, #THIGH                 ; czas timera
-0306 20B304             43             JB P3.3, NOSENS
-0309 C200               44             CLR STOP
-030B D201               45             SETB OPEN
-030D 200006             46     NOSENS: JB STOP, ENDT
-0310 200104             47             JB OPEN, OPROC
-0313 02032F             48             LJMP CPROC
-0316 32                 49     ENDT:   RETI
-                        50
-0317 E590               51     OPROC:  MOV A, P1
-0319 B40004             52             CJNE A, #CLOSED, NCLOS
-031C 759001             53             MOV P1, #00000001B
-031F 32                 54             RETI
-0320 75F002             55     NCLOS:  MOV B, #00000010B
-0323 A4                 56             MUL AB
-0324 04                 57             INC A
-0325 F590               58             MOV P1, A
-0327 E590               59             MOV A, P1
-0329 B4FFEA             60             CJNE A, #OPENED, ENDT
-032C D200               61             SETB STOP
-032E 32                 62             RETI
-                        63
-032F E590               64     CPROC:  MOV A, P1
-0331 75F002             65             MOV B, #00000010B
-0334 84                 66             DIV AB
-0335 F590               67             MOV P1, A
-0337 E590               68             MOV A, P1
-0339 B400DA             69             CJNE A, #CLOSED, ENDT
-033C D200               70             SETB STOP
-033E 32                 71             RETI
-                        72
-033F 200003             73     STER:   JB STOP, GGO
-0342 D200               74             SETB STOP
-0344 32                 75             RETI
-0345 B201               76     GGO:    CPL OPEN
-0347 C200               77             CLR STOP
-0349 32                 78             RETI
-                        79
-                        80     END
+0100 D200               27             SETB STOP
+0102 C201               28             CLR OPEN
+0104 759000             29             MOV P1, #CLOSED
+0107 758AF2             30             MOV TL0, #TLOW
+010A 758CFF             31             MOV TH0, #THIGH                 ; czas timera
+010D D28C               32             SETB TR0                        ; zacznij liczyć
+010F D288               33             SETB IT0                        ; przerwania na zboczu
+0111 D2A9               34             SETB ET0                        ; maska timera
+0113 D2A8               35             SETB EX0                        ; maska P3.2 (reset)
+0115 D2B8               36             SETB PX0                        ; wysoki priorytet przycisków
+0117 C2B9               37             CLR PT0                         ; niski priorytet timera
+0119 D2AF               38             SETB EA                         ; maska główna
+011B 02011B             39     MAIN:   LJMP MAIN
+                        40
+                        41     ORG 0300H
+0300 758AF2             42     TIMI:   MOV TL0, #TLOW
+0303 758CFF             43             MOV TH0, #THIGH                 ; czas timera
+0306 20B304             44             JB P3.3, NOSENS
+0309 C200               45             CLR STOP
+030B D201               46             SETB OPEN
+030D 200006             47     NOSENS: JB STOP, ENDT
+0310 200104             48             JB OPEN, OPROC
+0313 020328             49             LJMP CPROC
+0316 32                 50     ENDT:   RETI
+                        51
+0317 E590               52     OPROC:  MOV A, P1
+0319 75F002             53             MOV B, #TWO
+031C A4                 54             MUL AB
+031D 04                 55             INC A
+031E F590               56             MOV P1, A
+0320 E590               57             MOV A, P1
+0322 B4FFF1             58             CJNE A, #OPENED, ENDT
+0325 D200               59             SETB STOP
+0327 32                 60             RETI
+                        61
+0328 E590               62     CPROC:  MOV A, P1
+032A 75F002             63             MOV B, #TWO
+032D 84                 64             DIV AB
+032E F590               65             MOV P1, A
+0330 E590               66             MOV A, P1
+0332 B400E1             67             CJNE A, #CLOSED, ENDT
+0335 D200               68             SETB STOP
+0337 32                 69             RETI
+                        70
+0338 200003             71     STER:   JB STOP, GGO
+033B D200               72             SETB STOP
+033D 32                 73             RETI
+033E B201               74     GGO:    CPL OPEN
+0340 C200               75             CLR STOP
+0342 32                 76             RETI
+                        77
+                        78     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, 2 WARNINGS
 
 
 ERROR SUMMARY:
-Line 24, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
-Line 26, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
+Line 25, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
+Line 27, WARNING:Using`DBIT'directive,butactivesegmentis`CSEG'(shouldbeBSEG)
 
 SYMBOL TABLE:
 ??MCU_8051_IDE . . . . . . . . . . .  N  NUMB  8051H  NOT USED
@@ -140,7 +138,7 @@ CLKREG . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CLOSED . . . . . . . . . . . . . . .  N  NUMB  0000H
 CMOD . . . . . . . . . . . . . . . .  D  ADDR  00D9H  NOT USED
 CPRL2. . . . . . . . . . . . . . . .  B  ADDR  00C8H  NOT USED
-CPROC. . . . . . . . . . . . . . . .  C  ADDR  032FH
+CPROC. . . . . . . . . . . . . . . .  C  ADDR  0328H
 CR . . . . . . . . . . . . . . . . .  B  ADDR  00DEH  NOT USED
 CT2. . . . . . . . . . . . . . . . .  B  ADDR  00C9H  NOT USED
 CY . . . . . . . . . . . . . . . . .  B  ADDR  00D7H  NOT USED
@@ -166,7 +164,7 @@ EXTI0. . . . . . . . . . . . . . . .  C  ADDR  0003H  NOT USED
 EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H  NOT USED
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
-GGO. . . . . . . . . . . . . . . . .  C  ADDR  0345H
+GGO. . . . . . . . . . . . . . . . .  C  ADDR  033EH
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
@@ -185,7 +183,6 @@ KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
 MAIN . . . . . . . . . . . . . . . .  C  ADDR  011BH
-NCLOS. . . . . . . . . . . . . . . .  C  ADDR  0320H
 NOSENS . . . . . . . . . . . . . . .  C  ADDR  030DH
 OPEN . . . . . . . . . . . . . . . .  B  ADDR  0001H
 OPENED . . . . . . . . . . . . . . .  N  NUMB  00FFH
@@ -251,7 +248,7 @@ SPDAT. . . . . . . . . . . . . . . .  D  ADDR  00C5H  NOT USED
 SPDR . . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 SPSR . . . . . . . . . . . . . . . .  D  ADDR  00AAH  NOT USED
 SPSTA. . . . . . . . . . . . . . . .  D  ADDR  00C4H  NOT USED
-STER . . . . . . . . . . . . . . . .  C  ADDR  033FH
+STER . . . . . . . . . . . . . . . .  C  ADDR  0338H
 STOP . . . . . . . . . . . . . . . .  B  ADDR  0000H
 T0 . . . . . . . . . . . . . . . . .  B  ADDR  00B4H  NOT USED
 T1 . . . . . . . . . . . . . . . . .  B  ADDR  00B5H  NOT USED
@@ -280,6 +277,7 @@ TMOD . . . . . . . . . . . . . . . .  D  ADDR  0089H  NOT USED
 TR0. . . . . . . . . . . . . . . . .  B  ADDR  008CH
 TR1. . . . . . . . . . . . . . . . .  B  ADDR  008EH  NOT USED
 TR2. . . . . . . . . . . . . . . . .  B  ADDR  00CAH  NOT USED
+TWO. . . . . . . . . . . . . . . . .  N  NUMB  0002H
 TXD. . . . . . . . . . . . . . . . .  B  ADDR  00B1H  NOT USED
 WDTCON . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTPRG . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
