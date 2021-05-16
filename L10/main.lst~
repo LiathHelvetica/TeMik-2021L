@@ -11,90 +11,97 @@ main                                                                            
 0003 020386             10             LJMP USER
                         11
                         12     ORG 0000Bh
-000B 020323             13             LJMP TIMI
+000B 020326             13             LJMP TIMI
                         14
                         15     ORG 0300H
                         16     INIT:
   0001                  17             RCOD EQU 01H
-  000F                  18             RTLOW EQU 00FH
-  00FF                  19             RTHIGH EQU 0FFH
-  0002                  20             SETCOD EQU 02H
-  007F                  21             SETTLOW EQU 07FH
-  00FF                  22             SETTHIGH EQU 0FFH
-  0003                  23             YCOD EQU 03H
-  007F                  24             YTLOW EQU 07FH
-  00FF                  25             YTHIGH EQU 0FFH
-  0004                  26             GCOD EQU 04H
-  001F                  27             GTLOW EQU 01FH
-  00FF                  28             GTHIGH EQU 0FFH
+  0028                  18             RCOUNT EQU 40D
+  0002                  19             SETCOD EQU 02H
+  000A                  20             SETCOUNT EQU 10D
+  0003                  21             YCOD EQU 03H
+  000A                  22             YCOUNT EQU 10D
+  0004                  23             GCOD EQU 04H
+  0032                  24             GCOUNT EQU 50D
+                        25
+  00FF                  26             MAXT EQU 0FFH
+  0000                  27             LIGHT EQU 00H
+  00FF                  28             DARK EQU 0FFH
                         29
   0030                  30             STATE EQU 030H
-  0000                  31             LIGHT EQU 00H
-  00FF                  32             DARK EQU 0FFH
-0300 753001             33             MOV STATE, #RCOD
-0303 758000             34             MOV P0, #LIGHT
-0306 7590FF             35             MOV P1, #DARK
-0309 75A0FF             36             MOV P2, #DARK
-030C 758A0F             37             MOV TL0, #RTLOW
-030F 758CFF             38             MOV TH0, #RTHIGH
-0312 D28C               39             SETB TR0                        ; zacznij liczyć
-0314 D288               40             SETB IT0                        ; przerwania na zboczu
-0316 D2A9               41             SETB ET0                        ; maska timera
-0318 D2A8               42             SETB EX0                        ; maska P3.2 (reset)
-031A D2B8               43             SETB PX0                        ; wysoki priorytet przycisków
-031C C2B9               44             CLR PT0                         ; niski priorytet timera
-031E D2AF               45             SETB EA                         ; maska główna
-0320 020320             46     MAIN:   LJMP MAIN
-                        47
-0323 E530               48     TIMI:   MOV A, STATE
-0325 B40103             49             CJNE A, #RCOD, NRED
-0328 02033A             50             LJMP RED
-032B B40303             51     NRED:   CJNE A, #YCOD, NYEL
-032E 02034D             52             LJMP YEL
-0331 B40203             53     NYEL:   CJNE A, #SETCOD, NSET
-0334 020360             54             LJMP SETL
-0337 020373             55     NSET:   LJMP GRE
-                        56
-                        57     ; set set state
-033A 753002             58     RED:    MOV STATE, #SETCOD
-033D 758000             59             MOV P0, #LIGHT
-0340 759000             60             MOV P1, #LIGHT
-0343 75A0FF             61             MOV P2, #DARK
-0346 758A7F             62             MOV TL0, #SETTLOW
-0349 758CFF             63             MOV TH0, #SETTHIGH
-034C 32                 64             RETI
-                        65
-                        66     ; set red
-034D 753001             67     YEL:    MOV STATE, #RCOD
-0350 758000             68             MOV P0, #LIGHT
-0353 7590FF             69             MOV P1, #DARK
-0356 75A0FF             70             MOV P2, #DARK
-0359 758A0F             71             MOV TL0, #RTLOW
-035C 758CFF             72             MOV TH0, #RTHIGH
-035F 32                 73             RETI
-                        74
-                        75     ; set green
-0360 753004             76     SETL:   MOV STATE, #GCOD
-0363 7580FF             77             MOV P0, #DARK
-0366 7590FF             78             MOV P1, #DARK
-0369 75A000             79             MOV P2, #LIGHT
-036C 758A1F             80             MOV TL0, #GTLOW
-036F 758CFF             81             MOV TH0, #GTHIGH
-0372 32                 82             RETI
-                        83
-                        84     ; set yellow
-0373 753003             85     GRE:    MOV STATE, #YCOD
-0376 7580FF             86             MOV P0, #DARK
-0379 759000             87             MOV P1, #LIGHT
-037C 75A0FF             88             MOV P2, #DARK
-037F 758A7F             89             MOV TL0, #YTLOW
-0382 758CFF             90             MOV TH0, #YTHIGH
-0385 32                 91             RETI
-                        92
-                        93     USER:
-0386 32                 94             RETI
+  0031                  31             COUNTER EQU 031H
+                        32
+  00F2                  33             TLOW EQU 0F2H
+  00FF                  34             THIGH EQU 0FFH
+                        35
+0300 753001             36             MOV STATE, #RCOD
+0303 758000             37             MOV P0, #LIGHT
+0306 7590FF             38             MOV P1, #DARK
+0309 75A0FF             39             MOV P2, #DARK
+030C 758AF2             40             MOV TL0, #TLOW
+030F 758CFF             41             MOV TH0, #THIGH
+0312 753128             42             MOV COUNTER, #RCOUNT
+0315 D28C               43             SETB TR0                        ; zacznij liczyć
+0317 D288               44             SETB IT0                        ; przerwania na zboczu
+0319 D2A9               45             SETB ET0                        ; maska timera
+031B D2A8               46             SETB EX0                        ; maska P3.2 (reset)
+031D D2B8               47             SETB PX0                        ; wysoki priorytet przycisków
+031F C2B9               48             CLR PT0                         ; niski priorytet timera
+0321 D2AF               49             SETB EA                         ; maska główna
+0323 020323             50     MAIN:   LJMP MAIN
+                        51
+0326 758AF2             52     TIMI:   MOV TL0, #TLOW
+0329 758CFF             53             MOV TH0, #THIGH
+032C D53165             54             DJNZ COUNTER, ENDU
+032F E530               55     STATE:  MOV A, STATE
+0331 B40103             56             CJNE A, #RCOD, NRED
+0334 020346             57             LJMP RED
+0337 B40303             58     NRED:   CJNE A, #YCOD, NYEL
+033A 020356             59             LJMP YEL
+033D B40203             60     NYEL:   CJNE A, #SETCOD, NSET
+0340 020366             61             LJMP SETL
+0343 020376             62     NSET:   LJMP GRE
+                        63
+                        64     ; set set state
+0346 753002             65     RED:    MOV STATE, #SETCOD
+0349 758000             66             MOV P0, #LIGHT
+034C 759000             67             MOV P1, #LIGHT
+034F 75A0FF             68             MOV P2, #DARK
+0352 75310A             69             MOV COUNTER, #SETCOUNT
+0355 32                 70             RETI
+                        71
+                        72     ; set red
+0356 753001             73     YEL:    MOV STATE, #RCOD
+0359 758000             74             MOV P0, #LIGHT
+035C 7590FF             75             MOV P1, #DARK
+035F 75A0FF             76             MOV P2, #DARK
+0362 753128             77             MOV COUNTER, #RCOUNT
+0365 32                 78             RETI
+                        79
+                        80     ; set green
+0366 753004             81     SETL:   MOV STATE, #GCOD
+0369 7580FF             82             MOV P0, #DARK
+036C 7590FF             83             MOV P1, #DARK
+036F 75A000             84             MOV P2, #LIGHT
+0372 753132             85             MOV COUNTER, #GCOUNT
+0375 32                 86             RETI
+                        87
+                        88     ; set yellow
+0376 753003             89     GRE:    MOV STATE, #YCOD
+0379 7580FF             90             MOV P0, #DARK
+037C 759000             91             MOV P1, #LIGHT
+037F 75A0FF             92             MOV P2, #DARK
+0382 75310A             93             MOV COUNTER, #YCOUNT
+0385 32                 94             RETI
                         95
-                        96     END
+0386 E530               96     USER:   MOV A, STATE
+0388 B40409             97             CJNE A, #GCOD, ENDU
+038B 753100             98             MOV COUNTER, #0H
+038E 758CFF             99             MOV TH0, #MAXT
+0391 758AFF            100             MOV TL0, #MAXT
+0394 32                101     ENDU:   RETI
+                       102
+                       103     END
 ASSEMBLY COMPLETE, NO ERRORS FOUND, NO WARNINGS
 
 
@@ -148,6 +155,7 @@ CKSEL. . . . . . . . . . . . . . . .  D  ADDR  0085H  NOT USED
 CL . . . . . . . . . . . . . . . . .  D  ADDR  00E9H  NOT USED
 CLKREG . . . . . . . . . . . . . . .  D  ADDR  008FH  NOT USED
 CMOD . . . . . . . . . . . . . . . .  D  ADDR  00D9H  NOT USED
+COUNTER. . . . . . . . . . . . . . .  N  NUMB  0031H
 CPRL2. . . . . . . . . . . . . . . .  B  ADDR  00C8H  NOT USED
 CR . . . . . . . . . . . . . . . . .  B  ADDR  00DEH  NOT USED
 CT2. . . . . . . . . . . . . . . . .  B  ADDR  00C9H  NOT USED
@@ -162,6 +170,7 @@ DPL. . . . . . . . . . . . . . . . .  D  ADDR  0082H  NOT USED
 EA . . . . . . . . . . . . . . . . .  B  ADDR  00AFH
 EC . . . . . . . . . . . . . . . . .  B  ADDR  00AEH  NOT USED
 EECON. . . . . . . . . . . . . . . .  D  ADDR  0096H  NOT USED
+ENDU . . . . . . . . . . . . . . . .  C  ADDR  0394H
 ES . . . . . . . . . . . . . . . . .  B  ADDR  00ACH  NOT USED
 ET0. . . . . . . . . . . . . . . . .  B  ADDR  00A9H
 ET1. . . . . . . . . . . . . . . . .  B  ADDR  00ABH  NOT USED
@@ -175,9 +184,8 @@ EXTI1. . . . . . . . . . . . . . . .  C  ADDR  0013H  NOT USED
 F0 . . . . . . . . . . . . . . . . .  B  ADDR  00D5H  NOT USED
 FE . . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 GCOD . . . . . . . . . . . . . . . .  N  NUMB  0004H
-GRE. . . . . . . . . . . . . . . . .  C  ADDR  0373H
-GTHIGH . . . . . . . . . . . . . . .  N  NUMB  00FFH
-GTLOW. . . . . . . . . . . . . . . .  N  NUMB  001FH
+GCOUNT . . . . . . . . . . . . . . .  N  NUMB  0032H
+GRE. . . . . . . . . . . . . . . . .  C  ADDR  0376H
 IE . . . . . . . . . . . . . . . . .  D  ADDR  00A8H  NOT USED
 IE0. . . . . . . . . . . . . . . . .  B  ADDR  0089H  NOT USED
 IE1. . . . . . . . . . . . . . . . .  B  ADDR  008BH  NOT USED
@@ -196,10 +204,11 @@ KBE. . . . . . . . . . . . . . . . .  D  ADDR  009DH  NOT USED
 KBF. . . . . . . . . . . . . . . . .  D  ADDR  009EH  NOT USED
 KBLS . . . . . . . . . . . . . . . .  D  ADDR  009CH  NOT USED
 LIGHT. . . . . . . . . . . . . . . .  N  NUMB  0000H
-MAIN . . . . . . . . . . . . . . . .  C  ADDR  0320H
-NRED . . . . . . . . . . . . . . . .  C  ADDR  032BH
-NSET . . . . . . . . . . . . . . . .  C  ADDR  0337H
-NYEL . . . . . . . . . . . . . . . .  C  ADDR  0331H
+MAIN . . . . . . . . . . . . . . . .  C  ADDR  0323H
+MAXT . . . . . . . . . . . . . . . .  N  NUMB  00FFH
+NRED . . . . . . . . . . . . . . . .  C  ADDR  0337H
+NSET . . . . . . . . . . . . . . . .  C  ADDR  0343H
+NYEL . . . . . . . . . . . . . . . .  C  ADDR  033DH
 OSCCON . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 OV . . . . . . . . . . . . . . . . .  B  ADDR  00D2H  NOT USED
 P. . . . . . . . . . . . . . . . . .  B  ADDR  00D0H  NOT USED
@@ -236,15 +245,14 @@ RCAP2H . . . . . . . . . . . . . . .  D  ADDR  00CBH  NOT USED
 RCAP2L . . . . . . . . . . . . . . .  D  ADDR  00CAH  NOT USED
 RCLK . . . . . . . . . . . . . . . .  B  ADDR  00CDH  NOT USED
 RCOD . . . . . . . . . . . . . . . .  N  NUMB  0001H
+RCOUNT . . . . . . . . . . . . . . .  N  NUMB  0028H
 RD . . . . . . . . . . . . . . . . .  B  ADDR  00B7H  NOT USED
-RED. . . . . . . . . . . . . . . . .  C  ADDR  033AH
+RED. . . . . . . . . . . . . . . . .  C  ADDR  0346H
 REN. . . . . . . . . . . . . . . . .  B  ADDR  009CH  NOT USED
 RESET. . . . . . . . . . . . . . . .  C  ADDR  0000H  NOT USED
 RI . . . . . . . . . . . . . . . . .  B  ADDR  0098H  NOT USED
 RS0. . . . . . . . . . . . . . . . .  B  ADDR  00D3H  NOT USED
 RS1. . . . . . . . . . . . . . . . .  B  ADDR  00D4H  NOT USED
-RTHIGH . . . . . . . . . . . . . . .  N  NUMB  00FFH
-RTLOW. . . . . . . . . . . . . . . .  N  NUMB  000FH
 RXD. . . . . . . . . . . . . . . . .  B  ADDR  00B0H  NOT USED
 SADDR. . . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED
 SADDR_0. . . . . . . . . . . . . . .  D  ADDR  00A9H  NOT USED
@@ -255,9 +263,8 @@ SADEN_1. . . . . . . . . . . . . . .  D  ADDR  00BAH  NOT USED
 SBUF . . . . . . . . . . . . . . . .  D  ADDR  0099H  NOT USED
 SCON . . . . . . . . . . . . . . . .  D  ADDR  0098H  NOT USED
 SETCOD . . . . . . . . . . . . . . .  N  NUMB  0002H
-SETL . . . . . . . . . . . . . . . .  C  ADDR  0360H
-SETTHIGH . . . . . . . . . . . . . .  N  NUMB  00FFH
-SETTLOW. . . . . . . . . . . . . . .  N  NUMB  007FH
+SETCOUNT . . . . . . . . . . . . . .  N  NUMB  000AH
+SETL . . . . . . . . . . . . . . . .  C  ADDR  0366H
 SINT . . . . . . . . . . . . . . . .  C  ADDR  0023H  NOT USED
 SM0. . . . . . . . . . . . . . . . .  B  ADDR  009FH  NOT USED
 SM1. . . . . . . . . . . . . . . . .  B  ADDR  009EH  NOT USED
@@ -269,7 +276,8 @@ SPDAT. . . . . . . . . . . . . . . .  D  ADDR  00C5H  NOT USED
 SPDR . . . . . . . . . . . . . . . .  D  ADDR  0086H  NOT USED
 SPSR . . . . . . . . . . . . . . . .  D  ADDR  00AAH  NOT USED
 SPSTA. . . . . . . . . . . . . . . .  D  ADDR  00C4H  NOT USED
-STATE. . . . . . . . . . . . . . . .  N  NUMB  0030H
+STATE. . . . . . . . . . . . . . . .  C  ADDR  032FH
+STATE. . . . . . . . . . . . . . . .  N  NUMB  0030H  NOT USED
 T0 . . . . . . . . . . . . . . . . .  B  ADDR  00B4H  NOT USED
 T1 . . . . . . . . . . . . . . . . .  B  ADDR  00B5H  NOT USED
 T2CON. . . . . . . . . . . . . . . .  D  ADDR  00C8H  NOT USED
@@ -283,14 +291,16 @@ TF2. . . . . . . . . . . . . . . . .  B  ADDR  00CFH  NOT USED
 TH0. . . . . . . . . . . . . . . . .  D  ADDR  008CH
 TH1. . . . . . . . . . . . . . . . .  D  ADDR  008DH  NOT USED
 TH2. . . . . . . . . . . . . . . . .  D  ADDR  00CDH  NOT USED
+THIGH. . . . . . . . . . . . . . . .  N  NUMB  00FFH
 TI . . . . . . . . . . . . . . . . .  B  ADDR  0099H  NOT USED
 TIMER0 . . . . . . . . . . . . . . .  C  ADDR  000BH  NOT USED
 TIMER1 . . . . . . . . . . . . . . .  C  ADDR  001BH  NOT USED
 TIMER2 . . . . . . . . . . . . . . .  C  ADDR  002BH  NOT USED
-TIMI . . . . . . . . . . . . . . . .  C  ADDR  0323H
+TIMI . . . . . . . . . . . . . . . .  C  ADDR  0326H
 TL0. . . . . . . . . . . . . . . . .  D  ADDR  008AH
 TL1. . . . . . . . . . . . . . . . .  D  ADDR  008BH  NOT USED
 TL2. . . . . . . . . . . . . . . . .  D  ADDR  00CCH  NOT USED
+TLOW . . . . . . . . . . . . . . . .  N  NUMB  00F2H
 TMOD . . . . . . . . . . . . . . . .  D  ADDR  0089H  NOT USED
 TR0. . . . . . . . . . . . . . . . .  B  ADDR  008CH
 TR1. . . . . . . . . . . . . . . . .  B  ADDR  008EH  NOT USED
@@ -302,6 +312,5 @@ WDTPRG . . . . . . . . . . . . . . .  D  ADDR  00A7H  NOT USED
 WDTRST . . . . . . . . . . . . . . .  D  ADDR  00A6H  NOT USED
 WR . . . . . . . . . . . . . . . . .  B  ADDR  00B6H  NOT USED
 YCOD . . . . . . . . . . . . . . . .  N  NUMB  0003H
-YEL. . . . . . . . . . . . . . . . .  C  ADDR  034DH
-YTHIGH . . . . . . . . . . . . . . .  N  NUMB  00FFH
-YTLOW. . . . . . . . . . . . . . . .  N  NUMB  007FH
+YCOUNT . . . . . . . . . . . . . . .  N  NUMB  000AH
+YEL. . . . . . . . . . . . . . . . .  C  ADDR  0356H
